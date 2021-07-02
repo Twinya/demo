@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop 
+        http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context.xsd
+        http://code.alibabatech.com/schema/dubbo        
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- 使用disconf必须添加以下配置 -->
+    <bean id="disconfMgrBean" class="com.baidu.disconf.client.DisconfMgrBean"
+          destroy-method="destroy">
+        <property name="scanPackage" value="com.ymatou.demo1"/>
+    </bean>
+    <bean id="disconfMgrBean2" class="com.baidu.disconf.client.DisconfMgrBeanSecond"
+          init-method="init">
+    </bean>
+
+    <!-- bean id="propertiesDisconf"
+          class="com.baidu.disconf.client.addons.properties.ReloadablePropertiesFactoryBean">
+        <property name="locations">
+            <list>
+                <value>biz.properties</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="propertyPlaceholderConfigurer"
+          class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="propertiesArray">
+            <list>
+                <ref bean="propertiesDisconf"/>
+            </list>
+        </property>
+    </bean-->
+    
+	
+    <bean id="performanceMonitorAdvice"
+          class="com.ymatou.performancemonitorclient.PerformanceMonitorAdvice">
+        <property name="appId" value="${appId}"></property>
+        <property name="serverUrl" value="${perfmonapi.url}"></property>
+    </bean>
+    <aop:config>
+        <aop:advisor advice-ref="performanceMonitorAdvice"
+                     pointcut="execution(* com.ymatou.demo1.facade.*Facade.*(..))
+						|| execution(* com.ymatou.demo1.domain.repository..*Repo.*(..))
+						"/>
+    </aop:config>
+
+	
+	<import resource="classpath:spring/dubbo.xml"></import>
+    
+
+</beans>

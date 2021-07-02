@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration debug="false">
+
+<!-- !! 确保工程下一定存在`META-INF/app.properties`文件，包含`app.name=<your-project-name>`配置，Logback将自行应用该配置，将其配置为工程应用名和日志上下文 -->
+
+<property name="pattern"
+              value="%date [%thread] %-5level %logger{40} [%X{logPrefix}][%tid][%X{uid:-0}][%X{bid:-0}][%X{cip:-0}][%X{responseCode:-0}] - %msg%n"/>
+    <property name="appId" value="demo1.iapi.ymatou.com"/>
+    <property name="basePackage" value="com.ymatou.demo1"/>
+    <property name="baseDir" value="d://log//${appId}"/>
+
+    <property name="level" value="info"/>
+    <property name="charset" value="UTF-8"/>
+    <property name="immediateFlush" value="true"/>
+    <property name="queueSize" value="1024"/>
+	
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+
+        <encoder>
+            <pattern>
+                ${pattern}
+            </pattern>
+        </encoder>
+
+    </appender>
+    
+    <appender name="ERROR-APPENDER"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <file>${baseDir}/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${baseDir}/error.%d{yyyy-MM-dd}
+            </fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>${charset}</charset>
+            
+            <immediateFlush>${immediateFlush}</immediateFlush>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${pattern}</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-ERROR-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${queueSize}</queueSize>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </appender>
+
+    <appender name="DEFAULT-APPENDER"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${baseDir}/default.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${baseDir}/default.%d{yyyy-MM-dd}
+            </fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>${charset}</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${pattern}</pattern>
+            </layout>
+            <immediateFlush>${immediateFlush}</immediateFlush>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-DEFAULT-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${queueSize}</queueSize>
+        <appender-ref ref="DEFAULT-APPENDER"/>
+    </appender>
+
+    
+    <appender name="FACADE-APPENDER"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${baseDir}/facade.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${baseDir}/facade.%d{yyyy-MM-dd}</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>${charset}</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <pattern>${pattern}</pattern>
+            </layout>
+            <immediateFlush>${immediateFlush}</immediateFlush>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC-FACADE-APPENDER" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>${queueSize}</queueSize>
+        <appender-ref ref="FACADE-APPENDER"/>
+        <appender-ref ref="console"/>
+    </appender>
+
+
+    <!-- facade -->
+    <logger name="${basePackage}.facade" additivity="false">
+        <level value="${level}"/>
+        <appender-ref ref="ASYNC-FACADE-APPENDER"/>
+        <appender-ref ref="ASYNC-ERROR-APPENDER"/>
+    </logger>
+
+
+    <!-- default -->
+    <root level="${level}">
+        <appender-ref ref="ASYNC-DEFAULT-APPENDER"/>
+        <appender-ref ref="ASYNC-ERROR-APPENDER"/>
+        <appender-ref ref="console"/>
+        
+    </root>
+
+</configuration>
